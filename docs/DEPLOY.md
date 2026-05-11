@@ -145,6 +145,24 @@ The 14-migration chain (`0000_init` … `0013_people_is_owner`) has been collaps
 
 Robin is not yet GA, so no production data is affected. If a prior deploy needs to be carried forward, dump the data, drop the schema, redeploy with the squashed migrations, and reload the dump.
 
+## Recovering from `journal SHA drift` on boot
+
+Boot fails fatally with `drizzle journal SHA drift detected — disk does not match the recorded migration state`. This is the post-migration drift check (`migrations_meta.id='journal'`) refusing to start because the SHA-256 of `meta/_journal.json` on disk no longer matches the value recorded in the database.
+
+**When this fires after a renumber-only commit (the common case):** a commit reordered or renamed migration slots without introducing a new applied migration. `runMigrations` reports "no pending migrations" and so the post-migrate refresh of `migrations_meta` is skipped — the recorded SHA stays at the pre-renumber value. The schema itself is fine; only the recorded hash drifted.
+
+To reconcile, on the booting environment (so it sees the same disk and the same `DATABASE_URL` the failing app sees):
+
+```sh
+# Dry-run: prints diskSha and dbSha, makes no writes
+pnpm --filter @robin/core refresh-journal-sha
+
+# Apply: only after you have confirmed the diskSha matches what you expect
+pnpm --filter @robin/core refresh-journal-sha --apply
+```
+
+**Before applying, sanity-check the schema is the one those renumbered migrations describe** — if the drift was caused by something other than a renumber (forced push, cherry-pick of an unrelated migration, manual edit), reconciling will paper over a real corruption signal. When in doubt, do not apply.
+
 ## Known gaps in the Railway template
 
 - `railway.template.json` follows Railway's current config-as-code shape, but Railway's template spec is evolving and some fields (e.g. per-variable `required` enforcement, post-deploy SQL hooks) are not yet first-class. Variables without a `default` are documented via `description` so Railway's UI prompts the operator; if any are skipped, deploys will fail loudly on boot.

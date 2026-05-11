@@ -16,6 +16,7 @@
     "lint": "biome lint ./src",
     "mcp:inspect": "npx @modelcontextprotocol/inspector",
     "openapi:manifest": "tsx scripts/generate-openapi-manifest.ts",
+    "refresh-journal-sha": "tsx scripts/refresh-journal-sha.ts",
     "seed-fixture": "tsx scripts/seed-fixture.ts",
     "eval": "evalite run --threshold 50 eval",
     "eval:watch": "evalite watch eval"
