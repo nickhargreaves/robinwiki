@@ -97,6 +97,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  log.error({ err: err instanceof Error ? err.message : String(err) }, 'migrate-with-preserve failed')
+  log.error({ err }, 'migrate-with-preserve failed')
   process.exit(1)
 })

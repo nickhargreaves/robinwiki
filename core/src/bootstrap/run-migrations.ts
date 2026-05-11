@@ -110,7 +110,7 @@ export async function runMigrations(): Promise<void> {
   let appliedBefore = 0
   try {
     const rows = await db.execute<{ created_at: number }>(
-      /* sql */ `SELECT created_at FROM "__drizzle_migrations" ORDER BY created_at`
+      /* sql */ `SELECT created_at FROM drizzle."__drizzle_migrations" ORDER BY created_at`
     )
     appliedBefore = Array.isArray(rows) ? rows.length : 0
   } catch {
@@ -125,7 +125,7 @@ export async function runMigrations(): Promise<void> {
   let appliedAfter = 0
   try {
     const rows = await db.execute<{ created_at: number }>(
-      /* sql */ `SELECT created_at FROM "__drizzle_migrations" ORDER BY created_at`
+      /* sql */ `SELECT created_at FROM drizzle."__drizzle_migrations" ORDER BY created_at`
     )
     appliedAfter = Array.isArray(rows) ? rows.length : 0
   } catch {
